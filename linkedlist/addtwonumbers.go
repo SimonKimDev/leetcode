@@ -1,9 +1,5 @@
 package linkedlist
 
-import (
-	"fmt"
-)
-
 /*
 Definition for singly-linked list.
 
@@ -30,18 +26,11 @@ func AddTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	// need to pass pointer of result btw, because probably best to use recursion
 	// why? because the output order is in reverse.
 	// but it should also handle the remainder. Think about how that should work.
-	result := ListNode{
-		Val:  0,
-		Next: nil,
-	}
 
-	var remainder int
-	recursiveSolution(&result, l1, l2, &remainder)
-
-	return &result
+	return recursiveSolution(l1, l2, 0)
 }
 
-func recursiveSolution(result *ListNode, l1 *ListNode, l2 *ListNode, remainder *int) *ListNode {
+func recursiveSolution(l1, l2 *ListNode, carry int) *ListNode {
 	// paths
 	// 1. case when only l1 has value
 	// 2. case when only l2 has value
@@ -51,55 +40,22 @@ func recursiveSolution(result *ListNode, l1 *ListNode, l2 *ListNode, remainder *
 	// recursion should last until both nodes are currently nil
 
 	// exit case
-	if l1 == nil && l2 == nil {
-		if *remainder != 0 {
-			result.Next = &ListNode{Val: *remainder}
-			*remainder = 0
-		}
+	if l1 == nil && l2 == nil && carry == 0 {
+		return nil
+	}
 
-		return result
-	} else {
-		// There are going to be more things to add hence add Next Node
+	sum := carry
+	if l1 != nil {
+		sum += l1.Val
+		l1 = l1.Next
+	}
+	if l2 != nil {
+		sum += l2.Val
+		l2 = l2.Next
+	}
 
-		var numberToAdd int = 0
-		numberToAdd += *remainder
-		if l1 != nil {
-			numberToAdd += l1.Val
-
-			if l1.Next != nil {
-				l1 = l1.Next
-			} else {
-				l1 = nil
-			}
-		}
-		if l2 != nil {
-			numberToAdd += l2.Val
-			if l2.Next != nil {
-				l2 = l2.Next
-			} else {
-				l2 = nil
-			}
-		}
-
-		if numberToAdd >= 10 {
-			result.Val += (numberToAdd % 10)
-			*remainder = 1
-		} else {
-			result.Val += numberToAdd
-			*remainder = 0
-		}
-
-		// as long as they have something continue to chain.
-		if l1 != nil || l2 != nil {
-			result.Next = &ListNode{
-				Val:  0,
-				Next: nil,
-			}
-
-			result = result.Next
-		} else {
-			result.Next = nil
-		}
-		return recursiveSolution(result, l1, l2, remainder)
+	return &ListNode{
+		Val:  sum % 10,
+		Next: recursiveSolution(l1, l2, sum/10),
 	}
 }
